@@ -181,5 +181,84 @@ class plot_time_series():
 
         pass
 class bivariate():
+    def bivariate_map(self):  ## figure 1  ## LAImin and LAImax bivariate
+        import xymap
+
+        fdir = result_root + rf'\bivariate\LAImin_LAImax\trend_anaysis\\\\'
+
+        outdir = result_root + (rf'bivariate\\LAImin_LAImax\\')
+
+        T.mkdir(outdir)
+
+        # outtif = join(outdir,'CV_trend2.tif')
+        outtif = join(outdir, 'LAImax_min_mean.tif')
+
+        fpath1 = join(fdir, 'composite_LAImax_mean_trend.tif')
+
+        fpath2 = join(fdir, 'composite_LAImin_mean_trend.tif')
+
+        # 1
+        tif1_label, tif2_label = 'LAImax_trend', 'LAImin_trend'
+        # 2
+        # tif1_label, tif2_label = 'LAI_CV_trend','LAI_relative_change_mean_trend'
+
+        # 1
+        min1, max1 = -1, 1
+        min2, max2 = -1, 1
+
+        # 2
+        # min1, max1 = -.3, .3
+        # min2, max2 = -.5, .5
+
+        arr1 = ToRaster().raster2array(fpath1)[0]
+        arr2 = ToRaster().raster2array(fpath2)[0]
+
+        arr1[arr1 < -9999] = np.nan
+        arr2[arr2 < -9999] = np.nan
+
+        arr1_flattened = arr1.flatten()
+        arr2_flattened = arr2.flatten()
+
+        # plt.hist(arr1_flattened,bins=100)
+        # plt.title('arr1')
+        # plt.figure()
+        # plt.hist(arr2_flattened,bins=100)
+        # plt.title('arr2')
+        # plt.show()
+
+        # choice 1
+        upper_left_color = (0, 0, 110)
+        upper_right_color = (112, 196, 181)
+        lower_left_color = (237, 125, 49)
+
+        lower_right_color = (193, 92, 156)
+        center_color = (240, 240, 240)
+
+        ## CV greening option
+        #
+        # upper_left_color = (194, 0, 120)
+        # upper_right_color = (0,170,237)
+        # lower_left_color = (233, 55, 43)
+        # # lower_right_color = (160, 108, 168)
+        # lower_right_color = (234, 233, 46)
+        # center_color = (240, 240, 240)
+
+        xymap.Bivariate_plot_1(res=11,
+                               alpha=255,
+                               upper_left_color=upper_left_color,  #
+                               upper_right_color=upper_right_color,  #
+                               lower_left_color=lower_left_color,  #
+                               lower_right_color=lower_right_color,  #
+                               center_color=center_color).plot_bivariate(
+            fpath1, fpath2,
+            tif1_label, tif2_label,
+            min1, max1,
+            min2, max2,
+            outtif,
+            n_x=5, n_y=5
+        )
+
+        T.open_path_and_file(outdir)
+
     pass
 
