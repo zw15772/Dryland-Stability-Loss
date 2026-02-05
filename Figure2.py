@@ -1,0 +1,185 @@
+from __Global__ import *
+
+class plot_time_series():
+
+    def plot_LAIpercentile(self):
+        df = T.load_df(result_root + rf'\bivariate\Dataframe\\Dataframe_area_weighted.df')
+        df = self.df_clean(df)
+        print(len(df))
+
+        variable_list = ['composite_LAImax_mean',
+                         'composite_LAImin_mean',
+
+                         'composite_LAIp95_mean',
+                         'composite_LAIp90_mean',
+                         'composite_LAIp80_mean',
+                         'composite_LAIp70_mean',
+                         'composite_LAIp60_mean',
+
+                         'composite_LAIp40_mean',
+                         'composite_LAIp30_mean',
+                         'composite_LAIp20_mean',
+                         'composite_LAIp10_mean',
+                         'composite_LAIp5_mean',
+
+                         ]
+
+        # variable_list = ['composite_LAImax_mean',
+        #                  'composite_LAImin_mean',
+        #
+        #                  # 'composite_LAIp99_mean',
+        #                  'composite_LAIp95_mean',
+        #                  'composite_LAIp90_mean',
+        #                  'composite_LAIp80_mean',
+        #                  'composite_LAIp20_mean',
+        #
+        #                  'composite_LAIp10_mean',
+        #                  'composite_LAIp5_mean',
+        #                  # 'composite_LAIp1_mean',
+        #
+        #
+        #                  ]
+
+        dic_label = {'composite_LAImax_mean': 'LAImax',
+                     'composite_LAImin_mean': 'LAImin',
+                     'composite_LAIp99_mean': 'LAIp99',
+                     'composite_LAIp1_mean': 'LAIp1',
+                     'composite_LAIp10_mean': 'LAIp10',
+                     'composite_LAIp90_mean': 'LAIp90',
+                     'composite_LAIp5_mean': 'LAIp5',
+                     'composite_LAIp95_mean': 'LAIp95',
+                     'composite_LAIp60_mean': 'LAIp60',
+                     'composite_LAIp70_mean': 'LAIp70',
+                     'composite_LAIp80_mean': 'LAIp80',
+                     'composite_LAIp20_mean': 'LAIp20',
+                     'composite_LAIp30_mean': 'LAIp30',
+                     'composite_LAIp40_mean': 'LAIp40',
+
+                     }
+
+        color_dic = {
+
+            'composite_LAImax_mean': '#26269A',
+            'composite_LAImin_mean': '#D23F4D',
+            'composite_LAIp95_mean': '#5D4F9D',
+            'composite_LAIp5_mean': '#F36A31',
+
+            'composite_LAIp80_mean': 'teal',
+            'composite_LAIp20_mean': 'lightcoral',
+            'composite_LAIp60_mean': 'yellowgreen',
+            'composite_LAIp70_mean': 'cyan',
+            'composite_LAIp30_mean': 'olive',
+            'composite_LAIp40_mean': 'gold',
+
+            'composite_LAIp99_mean': 'blue',
+            'composite_LAIp1_mean': 'red',
+            'composite_LAIp10_mean': '#F8AF66',
+            'composite_LAIp90_mean': '#2A85BA',
+
+        }
+
+        year_list = range(0, 25)
+        result_dic = {}
+        std_dic = {}
+
+        # === 计算每个窗口的均值和标准差 ===
+        for var in variable_list:
+            mean_dic, std_dic_i = {}, {}
+            for year in year_list:
+                df_i = df[df['window'] == year]
+                ## scheme1
+                vals = np.array(df_i[f'{var}'].tolist(), dtype=float)
+                weight = np.array(df_i['area_weight'].tolist(), dtype=float)
+                weighted_mean_values = (
+                        np.nansum(vals * weight)
+                        / np.nansum(weight * np.isfinite(vals))
+                )
+
+                # print(year, weighted_mean_values)
+                ## scheme2
+                # vals = np.array(df_i[f'{var}'].tolist(), dtype=float)
+                # weighted_mean_values = np.nanmean(vals)
+
+                mean_dic[year] = weighted_mean_values
+
+            result_dic[var] = mean_dic
+            std_dic[var] = std_dic_i
+
+        df_mean = pd.DataFrame(result_dic)
+
+        # === 绘图 ===
+        plt.figure(figsize=(map_width * 1.8, map_height))
+        legendmap = {
+            'LAImax': 'LAImax',
+            'LAImin': 'LAImin',
+            'LAIp99': '99th',
+            'LAIp95': '95th',
+            'LAIp90': '90th',
+            'LAIp10': '10th',
+            'LAIp5': '5th',
+            'LAIp1': '1st',
+            'LAIp80': '80th',
+            'LAIp60': '60th',
+            'LAIp40': '40th',
+            'LAIp20': '20th',
+            'LAIp70': '70th',
+            'LAIp30': '30th',
+
+        }
+
+        for var in variable_list:
+            color = color_dic[var]
+
+            # 计算线和阴影区
+            y = df_mean[var]
+            # yerr = df_std[var]
+            years = list(year_list)
+
+            # 背景阴影 (mean ± std)
+            # plt.fill_between(years,
+            #                  y - yerr,
+            #                  y + yerr,
+            #                  color=color,
+            #                  alpha=0.1)
+
+            # 主趋势线
+            plt.plot(years, y, color=color, linewidth=2,
+                     label=legendmap[dic_label[var]], marker='o', markersize=5)
+
+            # 拟合趋势线 + 注释
+            slope, intercept, r_value, p_value, std_err = stats.linregress(years, y)
+            print(var, slope, p_value)
+            x_pos = max(years) * 0.85
+            y_pos = y.mean()
+            # plt.text(x_pos, y_pos + 1.5, f'{dic_label[var]} slope={slope:.3f}', fontsize=10, color=color)
+            # plt.text(x_pos, y_pos - 12, f'p={p_value:.3f}', fontsize=10, color=color)
+
+        # === X轴标签（15年滑窗） ===
+        window_size = 15
+        year_range = range(1982, 2021)
+        year_range_str = []
+        for year in year_range:
+            start_year = year
+            end_year = year + window_size - 1
+            if end_year > 2021:
+                break
+            year_range_str.append(f'{start_year}-{end_year}')
+
+        plt.yticks(fontsize=12)
+        plt.xticks(range(len(year_range_str))[::3], year_range_str[::3], rotation=45, ha='right', fontsize=12)
+
+        plt.ylabel('Relative change(%)', fontsize=12)
+        # plt.grid(alpha=0.4)
+        # plt.legend(fontsize=10, loc='lower right')
+        # plt.tight_layout()
+        # plt.show()
+
+        out_pdf_fdir = result_root + rf'FIGURE\\weighted_area\\'
+        T.mk_dir(out_pdf_fdir)
+        plt.savefig(out_pdf_fdir + 'time_series_LAIpercentile_SI_nolengend.pdf', dpi=300, bbox_inches='tight')
+        plt.close()
+
+        pass
+class bivariate():
+    pass
+
