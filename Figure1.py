@@ -9,10 +9,10 @@ class Trends_obs_and_model():
     def plot_remote_sensing(self): ## put main ms. so pdf
 
 
-        fdir_trend = result_root+rf'\Composite_LAI\relative_change\trend\\'
+        fdir_trend = result_root+rf'\Upload_Data\Figure1\Spatial\LAI\\'
         temp_root = result_root + rf'\Upload_Data\Figure1\Spatial\\temp_root\\'
 
-        outdir = result_root+rf'FIGURE\\Figure1\\'
+        outdir = result_root+rf'Upload_Data\\FIGURE\\Figure1\\'
         T.mk_dir(outdir, force=True)
 
 
@@ -41,8 +41,8 @@ class Trends_obs_and_model():
             outf = outdir + f+'.pdf'
             plt.savefig(outf)
             plt.close()
-            # T.open_path_and_file(outdir)
-            # exit()
+            T.open_path_and_file(outdir)
+            exit()
 
 
 
@@ -295,11 +295,11 @@ class Trends_CV_obs_and_model():
     def plot_remote_sensing(self): ## put main ms. so pdf
 
 
-        fdir_trend = result_root+rf'\Upload_Data\Figure1\Spatial\CVLAI\\'
+        fdir_trend = result_root+rf'\Upload_Data\Figure1\Spatial\\CVLAI\\'
         temp_root=result_root+rf'\Upload_Data\Figure1\Spatial\\temp_root\\'
         T.mkdir(temp_root,force=True)
 
-        outdir = result_root+rf'FIGURE\\Figure1b\\'
+        outdir = result_root+rf'Upload_Data\\FIGURE\\Figure1b\\'
         T.mk_dir(outdir, force=True)
 
 
@@ -311,12 +311,10 @@ class Trends_CV_obs_and_model():
                 continue
 
 
-            fname = f.split('.')[0]
-            fname_p_value = fname.replace('trend', 'p_value')
-            print(fname_p_value)
-            f_trend = fdir_trend + f
+
+            f_trend = result_root+rf'\Upload_Data\Figure1\Spatial\CVLAI\\composite_LAI_mean_detrend_CV_trend.tif'
             # print(fpath);exit()
-            p_value_f = fdir_trend + fname_p_value + '.tif'
+            p_value_f =result_root+rf'\Upload_Data\Figure1\Spatial\CVLAI\\composite_LAI_mean_detrend_CV_p_value.tif'
             print(p_value_f)
 
 
@@ -341,15 +339,19 @@ class Trends_CV_obs_and_model():
 
 
 class plot_time_series:
+    def __init__(self):
+        self.map_width = 13 * centimeter_factor
+        self.map_height = 8.2 * centimeter_factor
+        pass
     def run(self):
-        self.plot_relative_change_LAI()
+        # self.plot_relative_change_LAI()
         self.plot_CV_LAI()
         pass
 
     def plot_relative_change_LAI(self):  ##### plot for 4 clusters
 
         df = T.load_df(
-            result_root + rf'\Dataframe\relative_change\\relative_change_area_weighted.df')
+            result_root + rf'\Upload_Data\Figure1\time_series\\relative_change_area_weighted.df')
         print(len(df))
         df = self.df_clean(df)
 
@@ -425,17 +427,17 @@ class plot_time_series:
         plt.grid(True, axis='x')   # 只画竖线（随 x 刻度）
 
         plt.legend()
-        # plt.show()
-        out_pdf_fdir = result_root + rf'\Figure\\weighted_area\\Figure1a\\'
-        T.mk_dir(out_pdf_fdir, force=True)
-        plt.savefig(out_pdf_fdir + 'time_series_relative_change_mean.pdf', dpi=300, bbox_inches='tight')
-        plt.close()
+        plt.show()
+        # out_pdf_fdir = result_root + rf'\Figure\\weighted_area\\Figure1a\\'
+        # T.mk_dir(out_pdf_fdir, force=True)
+        # plt.savefig(out_pdf_fdir + 'time_series_relative_change_mean.pdf', dpi=300, bbox_inches='tight')
+        # plt.close()
 
 
     def plot_CV_LAI(self):  ##### plot for 4 clusters
 
         df = T.load_df(
-            result_root + rf'\Dataframe\\CVLAI\\CVLAI_area_weighted.df')
+            result_root + rf'\Upload_Data\Figure1\time_series\\CVLAI_area_weighted.df')
         print(len(df))
         df = self.df_clean(df)
 
@@ -529,21 +531,36 @@ class plot_time_series:
 
         plt.legend(loc='upper left')
 
-        # plt.show()
+        plt.show()
         # plt.tight_layout()
-        out_pdf_fdir = result_root + rf'\FIGURE\weighted_area\\'
-        T.mk_dir(out_pdf_fdir, force=True)
-        plt.savefig(out_pdf_fdir + 'time_series_CV_mean.pdf', dpi=300, bbox_inches='tight')
-        plt.close()
+        # out_pdf_fdir = result_root + rf'\FIGURE\weighted_area\\'
+        # T.mk_dir(out_pdf_fdir, force=True)
+        # plt.savefig(out_pdf_fdir + 'time_series_CV_mean.pdf', dpi=300, bbox_inches='tight')
+        # plt.close()
 
         #
         # plt.legend()
         # plt.show()
+    def df_clean(self, df):
+        T.print_head_n(df)
+        # df = df.dropna(subset=[self.y_variable])
+        # T.print_head_n(df)
+        # exit()
+        df = df[df['row'] > 60]
+        df = df[df['Aridity'] < 0.65]
+        df = df[df['LC_max'] < 10]
+        df = df[df['MODIS_LUCC'] != 12]
+
+        df = df[df['landcover_classfication'] != 'Cropland']
+
+        return df
 def main():
 
 
     # Trends_obs_and_model().run()  ## Figure 1
-    Trends_CV_obs_and_model().run()  ## Figure 2
+    # Trends_CV_obs_and_model().run()
+    plot_time_series().run()
+    #
 
     pass
 

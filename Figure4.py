@@ -134,10 +134,20 @@ class multiregression:
 
 
 
+def test():
 
+    print('test')
+
+
+    print('')
+    print('')
+
+
+    pass
 
 def main():
     multiregression().run()
+
 
 
     pass

@@ -1,9 +1,15 @@
 from __Global__ import *
 
 class plot_time_series():
+    def __init__(self):
+        self.map_width = 13 * centimeter_factor
+        self.map_height = 8.2 * centimeter_factor
+
+    def run(self):
+        self.plot_LAIpercentile()
 
     def plot_LAIpercentile(self):
-        df = T.load_df(result_root + rf'\bivariate\Dataframe\\Dataframe_area_weighted.df')
+        df = T.load_df(result_root + rf'\Upload_Data\Figure2\time_series\\Dataframe_area_weighted.df')
         df = self.df_clean(df)
         print(len(df))
 
@@ -172,21 +178,40 @@ class plot_time_series():
         # plt.grid(alpha=0.4)
         # plt.legend(fontsize=10, loc='lower right')
         # plt.tight_layout()
-        # plt.show()
+        plt.show()
 
-        out_pdf_fdir = result_root + rf'FIGURE\\weighted_area\\'
-        T.mk_dir(out_pdf_fdir)
-        plt.savefig(out_pdf_fdir + 'time_series_LAIpercentile_SI_nolengend.pdf', dpi=300, bbox_inches='tight')
-        plt.close()
+        # out_pdf_fdir = result_root + rf'FIGURE\\weighted_area\\'
+        # T.mk_dir(out_pdf_fdir)
+        # plt.savefig(out_pdf_fdir + 'time_series_LAIpercentile_SI_nolengend.pdf', dpi=300, bbox_inches='tight')
+        # plt.close()
 
         pass
+
+    def df_clean(self, df):
+        T.print_head_n(df)
+        # df = df.dropna(subset=[self.y_variable])
+        # T.print_head_n(df)
+        # exit()
+        df = df[df['row'] > 60]
+        df = df[df['Aridity'] < 0.65]
+        df = df[df['LC_max'] < 10]
+        df = df[df['MODIS_LUCC'] != 12]
+
+        df = df[df['landcover_classfication'] != 'Cropland']
+
+        return df
+
+
 class bivariate():
+    def run(self):
+        self.bivariate_map()
+        pass
     def bivariate_map(self):  ## figure 1  ## LAImin and LAImax bivariate
         import xymap
 
-        fdir = result_root + rf'\bivariate\LAImin_LAImax\trend_anaysis\\\\'
+        fdir = result_root + rf'Upload_Data\Figure2\spatial\\\\'
 
-        outdir = result_root + (rf'bivariate\\LAImin_LAImax\\')
+        outdir = result_root + (rf'Upload_Data\\Figure\\Figure2')
 
         T.mkdir(outdir)
 
@@ -262,7 +287,10 @@ class bivariate():
 
     pass
 
+
 def main():
+    # plot_time_series().run()
+    bivariate().run()
 
 
     pass
