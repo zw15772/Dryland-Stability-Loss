@@ -3,7 +3,6 @@ from __Global__ import *
 class multiregression:
     def __init__(self):
         self.model_list = [
-
                            'composite_LAI_median']
     def run(self):
         self.statistic_corr_boxplot()
