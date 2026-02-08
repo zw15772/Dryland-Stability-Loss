@@ -203,6 +203,9 @@ class plot_time_series():
 
 
 class bivariate():
+    def __init__(self):
+        self.map_width = 13 * centimeter_factor
+        self.map_height = 8.2 * centimeter_factor
     def run(self):
         self.bivariate_map()
         pass
