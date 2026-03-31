@@ -5,16 +5,17 @@ class multiregression:
         self.model_list = [
                            'composite_LAI_median']
     def run(self):
-        self.statistic_corr_boxplot()
+        # self.statistic_corr_boxplot()
+        self.statistic_contribution_no_residual()
 
     def statistic_corr_boxplot(self):
 
 
         # === 1. read ===
-        dff = result_root + rf'\Upload_Data\Figure4\1mm_new\\Obs.df'
+        dff = result_root + rf'\Upload_Data\Figure4\partial_correlation\\1mm\\Obs.df'
         df = T.load_df(dff)
         df = self.df_clean(df)
-        print(len(df))
+        # print(len(df))
 
 
 
@@ -47,7 +48,7 @@ class multiregression:
                 vals = np.array(df[new_variable].tolist(), dtype=float)
                 vals[(vals > 99) | (vals < -99)] = np.nan
                 vals = vals[~np.isnan(vals)]
-                print(f'{variable}', len(vals))
+                # print(f'{variable}', len(vals))
 
                 #     plt.hist(vals, bins=30)
                 #     plt.axvline(np.mean(vals), color='g', label='Mean')
@@ -120,12 +121,12 @@ class multiregression:
             plt.ylabel('Partial correlation', fontsize=10)
 
             plt.axhline(0, color='gray', linestyle='--')
-            # plt.tight_layout()
-            # plt.show()
-
-            outdir = result_root + rf'\FIGURE\SI\\'
-            Tools().mk_dir(outdir, force=True)
+            plt.tight_layout()
             plt.show()
+
+            # outdir = result_root + rf'\FIGURE\SI\\'
+            # Tools().mk_dir(outdir, force=True)
+            # plt.show()
 
             # outf=join(outdir,f'{model}_partial_correlation_boxplot_3mm.pdf')
             # plt.savefig(outf,bbox_inches='tight',dpi=300
@@ -133,9 +134,107 @@ class multiregression:
             # )
             # plt.close()
 
+    def  statistic_contribution_no_residual(self):
+        import matplotlib.pyplot as plt
+        import numpy as np
+        import os
+
+        dff = result_root + rf'\Upload_Data\Figure4\contribution\\1mm\\statistics.df'
+        df = T.load_df(dff)
+        df = self.df_clean(df)
+
+
+        ## platte
+        color_list = ['#a577ad', 'yellowgreen', 'Pink', '#f599a1']
+        dark_colors = ['#774685', 'Olive', 'Salmon', '#c3646f']  # 可以改为你自定义的 darken_color 函数
+
+
+        for model in self.model_list:
+            if not 'median' in model:
+                continue
+
+            fixed_order = [
+                f'{model}_sensitivity_zscore_trend_contrib',
+                f'{model}_Precip_sum_detrend_CV_zscore_trend_contrib',
+                f'{model}_CV_daily_rainfall_average_zscore_trend_contrib'
+
+            ]
+
+            label_map = {
+                f'{model}_sensitivity_zscore_trend_contrib': 'γ',
+                f'{model}_Precip_sum_detrend_CV_zscore_trend_contrib': 'CV_inter',
+                f'{model}_CV_daily_rainfall_average_zscore_trend_contrib':'CV_intra'
+
+            }
+
+            means, sems, labels = [], [], []
+            print(len(df))
+
+            df = df[df[f'{model}_detrend_CV_zscore_trend'] > 0]
+            df = df[df[f'{model}_detrend_CV_zscore_p_value'] < 0.05]
+            #
+            # print(len(df));exit()
+
+            ## calculate mean and sem
+            for var in fixed_order:
+                if var not in df.columns:
+                    continue
+                vals = np.array(df[var].values, dtype=float)
+                vals[(vals > 99) | (vals < -99)] = np.nan
+                vals = vals[~np.isnan(vals)]
+                # print(vals);exit()
+                if len(vals) == 0:
+                    continue
+
+                mean_val = np.nanmean(vals)
+                # print(np.std(vals));exit()
+                sem_val = np.nanstd(vals) / np.sqrt(len(vals))  # 标准误差
+
+                means.append(mean_val)
+                sems.append(sem_val)
+                labels.append(label_map[var])
+            # print(sems)
+            # print(means);exit()
+            # print(f'{model}:', means)
+
+          ## plot
+            fig, ax = plt.subplots(figsize=(4, 3))
+            x = np.arange(len(labels))
+            colors = color_list
+            edges = dark_colors
+
+            bars = ax.bar(
+                x, means, width=0.4,
+                color=colors, edgecolor=edges, linewidth=1.2, zorder=2
+            )
+
+
+            for xi, mean, sem, edge in zip(x, means, sems, edges):
+                ax.errorbar(
+                    xi, mean, yerr=sem,
+                    fmt='none', ecolor=edge, elinewidth=1.2, capsize=4, zorder=3
+                )
+
+
+            ax.axhline(0, color='gray', linestyle='--', lw=1)
+            ax.set_xticks(x)
+            ax.set_xticklabels(labels, fontsize=12)
+            ax.set_ylabel('Attribution of CVLAI (%)', fontsize=12)
+            ax.set_yticklabels(ax.get_yticks(), fontsize=12)
+            # ax.spines['top'].set_visible(False)
+            # ax.spines['right'].set_visible(False)
+            # ax.spines['left'].set_linewidth(1)
+            # ax.spines['bottom'].set_linewidth(1)
+            ax.tick_params(axis='y', width=1, length=3)
+            ax.tick_params(axis='x', width=1, length=0)
+            # plt.tight_layout()
+
+            plt.show()
+
+
 
     def df_clean(self, df):
-        T.print_head_n(df)
+        # T.print_head_n(df)
         # df = df.dropna(subset=[self.y_variable])
         # T.print_head_n(df)
         # exit()
