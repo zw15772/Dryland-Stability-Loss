@@ -221,7 +221,6 @@ class bivariate():
 
         T.mkdir(outdir)
 
-        # outtif = join(outdir,'CV_trend2.tif')
         outtif = join(outdir, 'LAImax_min_mean.tif')
 
         fpath1 = join(fdir, 'composite_LAImax_mean_trend.tif')
@@ -243,15 +242,6 @@ class bivariate():
         arr1[arr1 < -9999] = np.nan
         arr2[arr2 < -9999] = np.nan
 
-        arr1_flattened = arr1.flatten()
-        arr2_flattened = arr2.flatten()
-
-        # plt.hist(arr1_flattened,bins=100)
-        # plt.title('arr1')
-        # plt.figure()
-        # plt.hist(arr2_flattened,bins=100)
-        # plt.title('arr2')
-        # plt.show()
 
         # choice 1
         upper_left_color = (0, 0, 110)
@@ -309,8 +299,7 @@ class bivariate_plot(Bivariate_plot_1):
             min2, max2,
             outtif,
             n_x = 6, n_y = 5):
-        # tif1, tif2, tif1_label, tif2_label, min1, max1, min2, max2, outf,
-        # n = (5, 5), n_legend = (101, 101), zcmap = None, legend_title = ''
+
 
         arr_template = GDAL_func().raster2array(tif1)
         spatial_dict1 = GDAL_func().tif_to_spatial_dic(tif1)
@@ -362,11 +351,15 @@ class bivariate_plot(Bivariate_plot_1):
             result_arr[r][c] = color_arr
         # outf = '/Volumes/NVME2T/China_drought_response/results/statistic/Bivariate_statistic/tif/xy_map_lag/SPEI03/bivariate.tif'
         result_arr = np.array(result_arr, dtype=np.uint8)
-        GDAL_func().RGBA_to_tif(result_arr, outtif,tif1)
+        plt.imshow(result_arr)
+        # GDAL_func().RGBA_to_tif(result_arr, outtif,tif1)
         plt.figure(figsize=(5, 5))
         plt.imshow(self.rgb_arr[::-1])
         plt.xlabel(tif1_label)
         plt.ylabel(tif2_label)
+        # plt.show()
+
+
 
         x_ticklabels = np.linspace(min1, max1, n_x)
         y_ticklabels = np.linspace(min2, max2, n_y)[::-1]
@@ -377,6 +370,7 @@ class bivariate_plot(Bivariate_plot_1):
 
         plt.xticks(xticks, x_ticklabels)
         plt.yticks(yticks, y_ticklabels)
+        plt.show()
         # outpdf = outtif.replace('.tif', '.pdf')
         # plt.savefig(outpdf)
         # plt.close()
