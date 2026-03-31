@@ -16,15 +16,15 @@ class plot_CV_trend_among_models2:
                       '#984ea3', 'yellow',
                       '#9e9e9e', '#cfeaf1', '#f6cae5',
                       '#98cccb', '#5867AF', '#e66d50', ]
-        ## I want use set 3 color
+
 
         mark_size_list = [200] * 1 + [50] * 3 + [200] * 1 + [50] * 13
 
         dff = result_root + rf'\Upload_Data\Figure3\Trends_CV\\Trends_CV_area_weighted.df'
         df = T.load_df(dff)
         df = self.df_clean(df)
-        T.print_head_n(df)
-        print(df.columns.tolist())
+        # T.print_head_n(df)
+        # print(df.columns.tolist())
         ## print column names
         # print(df.columns)
         # exit()
@@ -75,15 +75,15 @@ class plot_CV_trend_among_models2:
         vals_trend_list = np.array(vals_trend_list)
         vals_trend_list_sort = np.sort(vals_trend_list)
 
-        print(vals_trend_list_sort)
+        # print(vals_trend_list_sort)
 
         vals_CV_list = np.array(vals_CV_list)
         vals_CV_list_sort = np.sort(vals_CV_list)
 
-        print(vals_CV_list_sort);
+        # print(vals_CV_list_sort);
         # exit()
 
-        # exit()
+
 
         n = len(variables_list)
         mark_size_list = mark_size_list[:n]
@@ -129,7 +129,7 @@ class plot_CV_trend_among_models2:
     pass
 
     def df_clean(self, df):
-        T.print_head_n(df)
+        # T.print_head_n(df)
         # df = df.dropna(subset=[self.y_variable])
         # T.print_head_n(df)
         # exit()
@@ -156,8 +156,8 @@ class plot_TRENDY_LAImin_LAImax_barplot:  ## Figure 3b
         dff=result_root+rf'\Upload_Data\Figure3\LAImin_LAImax\\Dataframe_area_weighted.df'
         df=T.load_df(dff)
         df=self.df_clean(df)
-        for column in df.columns:
-            print(column)
+        # for column in df.columns:
+        #     print(column)
         # exit()
 
         variables_list = ['composite_LAI_mean', 'LAI4g',   'GLOBMAP','SNU_LAI',
@@ -256,7 +256,7 @@ class plot_TRENDY_LAImin_LAImax_barplot:  ## Figure 3b
         # plt.savefig(outf, dpi=300, )
         #
     def df_clean(self, df):
-        T.print_head_n(df)
+        # T.print_head_n(df)
         # df = df.dropna(subset=[self.y_variable])
         # T.print_head_n(df)
         # exit()
