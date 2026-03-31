@@ -4,9 +4,9 @@ from __Global__ import *
 
 class Trends_obs_and_model():
     def run(self):
-        self.plot_remote_sensing()
+        self.plot_remote_sensing_LAI_trend()
 
-    def plot_remote_sensing(self): ## put main ms. so pdf
+    def plot_remote_sensing_LAI_trend(self): ## put main ms. so pdf
 
 
         fdir_trend = result_root+rf'\Upload_Data\Figure1\Spatial\LAI\\'
@@ -33,16 +33,25 @@ class Trends_obs_and_model():
             print(p_value_f)
             # exit()
             plt.figure(figsize=(Plot_Robinson_remote_sensing().map_width, Plot_Robinson_remote_sensing().map_height))
-            m, ret = Plot_Robinson_remote_sensing().plot_Robinson(fpath, vmin=-1, vmax=1, is_discrete=True, colormap_n=9,)
+
+            color_list = [
+                '#844000',
+                '#fc9831',
+                '#fffbd4',
+                '#86b9d2',
+                '#064c6c',
+            ]
+
+            m, ret = Plot_Robinson_remote_sensing().plot_Robinson(fpath,  vmin=-1, vmax=1, is_discrete=True, colormap_n=9,color_list=color_list)
 
             Plot_Robinson_remote_sensing().plot_Robinson_significance_scatter(m,p_value_f,temp_root,0.05, s=0.5, marker='.')
-            # plt.title(f'{fname}')
-            # plt.show()
-            outf = outdir + f+'.pdf'
-            plt.savefig(outf)
-            plt.close()
-            T.open_path_and_file(outdir)
-            exit()
+            plt.title(f'Trends in LAI (%/yr)')
+            plt.show()
+            # outf = outdir + f+'.pdf'
+            # plt.savefig(outf)
+            # plt.close()
+            # T.open_path_and_file(outdir)
+            # exit()
 
 
 
@@ -139,29 +148,15 @@ class Plot_Robinson_remote_sensing:
 
 
     def plot_Robinson(self, fpath, ax=None, cmap=None, vmin=None, vmax=None, is_plot_colorbar=True, is_reproj=True,
-                      res=25000, is_discrete=False, colormap_n=11):
+                      res=25000, is_discrete=False, colormap_n=11,color_list=None):
         '''
         :param fpath: tif file
         :param is_reproj: if True, reproject file from 4326 to Robinson
         :param res: resolution, meter
         ## trend color list
         '''
-        # color_list = [
-        #     '#844000',
-        #     '#fc9831',
-        #     '#fffbd4',
-        #     '#86b9d2',
-        #     '#064c6c',
-        # ]
-        ## CV list
 
-        color_list = [
-            '#008837',
-            '#a6dba0',
-            '#f7f7f7',
-            '#c2a5cf',
-            '#7b3294',
-        ]
+
         # std_list=[ '#e66101',
         #            '#fdb863',
         #            '#f7f7f7',
@@ -169,6 +164,7 @@ class Plot_Robinson_remote_sensing:
         #            '#5e3c99',
         #
         # ]
+
         # Blue represents high values, and red represents low values.
         if ax == None:
             # plt.figure(figsize=(10, 10))
@@ -289,10 +285,10 @@ class Trends_CV_obs_and_model():
     def __init__(self):
         pass
     def run(self):
-        self.plot_remote_sensing()
+        self.plot_remote_sensing_CV()
 
 
-    def plot_remote_sensing(self): ## put main ms. so pdf
+    def plot_remote_sensing_CV(self): ## put main ms. so pdf
 
 
         fdir_trend = result_root+rf'\Upload_Data\Figure1\Spatial\\CVLAI\\'
@@ -318,18 +314,27 @@ class Trends_CV_obs_and_model():
             print(p_value_f)
 
 
+            color_list = [
+                '#008837',
+                '#a6dba0',
+                '#f7f7f7',
+                '#c2a5cf',
+                '#7b3294',
+            ]
+
+
 
             # exit()
             plt.figure(figsize=(Plot_Robinson_remote_sensing().map_width, Plot_Robinson_remote_sensing().map_height))
-            m, ret = Plot_Robinson_remote_sensing().plot_Robinson(f_trend, vmin=-1, vmax=1, is_discrete=True, colormap_n=9,)
+            m, ret = Plot_Robinson_remote_sensing().plot_Robinson(f_trend, vmin=-1, vmax=1, is_discrete=True, colormap_n=9,color_list=color_list, )
 
             Plot_Robinson_remote_sensing().plot_Robinson_significance_scatter(m,p_value_f,temp_root,0.05, s=0.5, marker='.')
-            # plt.title(f'{fname}')
-            # plt.show()
+            plt.title('Trends in LAIcv')
+            plt.show()
 
-            outf = outdir + f+'.pdf'
-            plt.savefig(outf)
-            plt.close()
+            # outf = outdir + f+'.pdf'
+            # plt.savefig(outf)
+            # plt.close()
             # T.open_path_and_file(outdir)
             # exit()
 
@@ -352,11 +357,11 @@ class plot_time_series:
 
         df = T.load_df(
             result_root + rf'\Upload_Data\Figure1\time_series\\relative_change_area_weighted.df')
-        print(len(df))
+        # print(len(df))
         df = self.df_clean(df)
 
-        print(len(df))
-        T.print_head_n(df)
+        # print(len(df))
+        # T.print_head_n(df)
         # exit()
 
         # create color list with one green and another 14 are grey
@@ -366,8 +371,8 @@ class plot_time_series:
         linewidth_list = [2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 
 
-        fig = plt.figure()
-        i = 1
+
+
 
         # variable_list = ['LAI4g', 'AVHRR_solely_relative_change','GEODES_AVHRR_LAI_relative_change',]
         # variable_list = ['NDVI', 'NDVI4g', 'GIMMS_plus_NDVI', ]
@@ -406,7 +411,7 @@ class plot_time_series:
             result_dic[var] = mean_dic
 
 
-        # 转成 DataFrame
+        # convert to DataFrame
         df_new = pd.DataFrame(result_dic).reset_index()
 
 
@@ -421,7 +426,7 @@ class plot_time_series:
             plt.plot(year_list, df_new[var], label=dic_label[var],linewidth=linewidth_list[flag], color=color_list[flag])
             flag=flag+1
             slope, intercept, r_value, p_value, std_err = stats.linregress(year_list, df_new[var])
-            print(var, f'{slope:.2f}', f'{p_value:.2f}')
+            # print(var, f'{slope:.2f}', f'{p_value:.2f}')
         plt.ylabel('Relative change LAI (%)')
 
         plt.grid(True, axis='x')   # 只画竖线（随 x 刻度）
@@ -438,10 +443,10 @@ class plot_time_series:
 
         df = T.load_df(
             result_root + rf'\Upload_Data\Figure1\time_series\\CVLAI_area_weighted.df')
-        print(len(df))
+        # print(len(df))
         df = self.df_clean(df)
 
-        print(len(df))
+        # print(len(df))
         T.print_head_n(df)
         # exit()
 
@@ -503,7 +508,7 @@ class plot_time_series:
             )
 
             slope, intercept, r_value, p_value, std_err = stats.linregress(year_list, df_new[var])
-            print(var, f'{slope:.2f}', f'{p_value:.2f}')
+            # print(var, f'{slope:.2f}', f'{p_value:.2f}')
 
             ## std
 
@@ -555,11 +560,12 @@ class plot_time_series:
 
         return df
 def main():
+    # plot_time_series().plot_relative_change_LAI()  ## Figure 1 a
+    # plot_time_series().plot_CV_LAI()  ## Figure 1 c
+    # Trends_obs_and_model().run()  ## Figure 1 b
+    Trends_CV_obs_and_model().run() ## Figure 1 d
 
 
-    # Trends_obs_and_model().run()  ## Figure 1
-    # Trends_CV_obs_and_model().run()
-    plot_time_series().run()
     #
 
     pass
