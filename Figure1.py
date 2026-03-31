@@ -447,7 +447,7 @@ class plot_time_series:
         df = self.df_clean(df)
 
         # print(len(df))
-        T.print_head_n(df)
+        # T.print_head_n(df)
         # exit()
 
         # create color list with one green and another 14 are grey
@@ -547,7 +547,7 @@ class plot_time_series:
         # plt.legend()
         # plt.show()
     def df_clean(self, df):
-        T.print_head_n(df)
+        # T.print_head_n(df)
         # df = df.dropna(subset=[self.y_variable])
         # T.print_head_n(df)
         # exit()

@@ -1,3 +1,6 @@
+
+from xymap import *
+
 from __Global__ import *
 
 class plot_time_series():
@@ -11,7 +14,7 @@ class plot_time_series():
     def plot_LAIpercentile(self):
         df = T.load_df(result_root + rf'\Upload_Data\Figure2\time_series\\Dataframe_area_weighted.df')
         df = self.df_clean(df)
-        print(len(df))
+        # print(len(df))
 
         variable_list = ['composite_LAImax_mean',
                          'composite_LAImin_mean',
@@ -154,7 +157,7 @@ class plot_time_series():
 
             # 拟合趋势线 + 注释
             slope, intercept, r_value, p_value, std_err = stats.linregress(years, y)
-            print(var, slope, p_value)
+            # print(var, slope, p_value)
             x_pos = max(years) * 0.85
             y_pos = y.mean()
             # plt.text(x_pos, y_pos + 1.5, f'{dic_label[var]} slope={slope:.3f}', fontsize=10, color=color)
@@ -188,7 +191,7 @@ class plot_time_series():
         pass
 
     def df_clean(self, df):
-        T.print_head_n(df)
+        # T.print_head_n(df)
         # df = df.dropna(subset=[self.y_variable])
         # T.print_head_n(df)
         # exit()
@@ -225,18 +228,14 @@ class bivariate():
 
         fpath2 = join(fdir, 'composite_LAImin_mean_trend.tif')
 
-        # 1
-        tif1_label, tif2_label = 'LAImax_trend', 'LAImin_trend'
-        # 2
-        # tif1_label, tif2_label = 'LAI_CV_trend','LAI_relative_change_mean_trend'
 
-        # 1
+        tif1_label, tif2_label = 'LAImax_trend', 'LAImin_trend'
+
+
         min1, max1 = -1, 1
         min2, max2 = -1, 1
 
-        # 2
-        # min1, max1 = -.3, .3
-        # min2, max2 = -.5, .5
+
 
         arr1 = ToRaster().raster2array(fpath1)[0]
         arr2 = ToRaster().raster2array(fpath2)[0]
@@ -262,16 +261,8 @@ class bivariate():
         lower_right_color = (193, 92, 156)
         center_color = (240, 240, 240)
 
-        ## CV greening option
-        #
-        # upper_left_color = (194, 0, 120)
-        # upper_right_color = (0,170,237)
-        # lower_left_color = (233, 55, 43)
-        # # lower_right_color = (160, 108, 168)
-        # lower_right_color = (234, 233, 46)
-        # center_color = (240, 240, 240)
 
-        xymap.Bivariate_plot_1(res=11,
+        bivariate_plot(res=11,
                                alpha=255,
                                upper_left_color=upper_left_color,  #
                                upper_right_color=upper_right_color,  #
@@ -286,9 +277,110 @@ class bivariate():
             n_x=5, n_y=5
         )
 
-        T.open_path_and_file(outdir)
+        # T.open_path_and_file(outdir)
 
     pass
+
+class bivariate_plot(Bivariate_plot_1):
+    def __init__(self,
+                 res=7,
+                 alpha=200,
+                 upper_left_color=(255, 202, 202),
+                 upper_right_color=(148, 202, 112),
+                 lower_left_color=(110, 0, 0),
+                 lower_right_color=(0, 0, 110),
+                 center_color=(240, 240, 240),
+                 ):
+
+
+        super().__init__( res=res,
+                 alpha=alpha,
+                 upper_left_color=upper_left_color,
+                 upper_right_color=upper_right_color,
+                 lower_left_color=lower_left_color,
+                 lower_right_color=lower_right_color,
+                 center_color=center_color,
+                 )
+
+    def plot_bivariate(
+            self,tif1, tif2,
+            tif1_label, tif2_label,
+            min1, max1,
+            min2, max2,
+            outtif,
+            n_x = 6, n_y = 5):
+        # tif1, tif2, tif1_label, tif2_label, min1, max1, min2, max2, outf,
+        # n = (5, 5), n_legend = (101, 101), zcmap = None, legend_title = ''
+
+        arr_template = GDAL_func().raster2array(tif1)
+        spatial_dict1 = GDAL_func().tif_to_spatial_dic(tif1)
+        spatial_dict2 = GDAL_func().tif_to_spatial_dic(tif2)
+        # spatial_dict1 = lytools.DIC_and_TIF(tif_template=tif1).spatial_tif_to_dic(tif1)
+        # spatial_dict2 = lytools.DIC_and_TIF(tif_template=tif2).spatial_tif_to_dic(tif2)
+
+        spatial_dict_all = {
+            tif1_label: spatial_dict1,
+            tif2_label: spatial_dict2
+        }
+
+        df = GDAL_func().spatial_dics_to_df(spatial_dict_all)
+        df = df.dropna(how='any')
+        result_arr = []
+        for i in range(len(arr_template)):
+            result_arr.append([])
+            for j in range(len(arr_template[0])):
+                result_arr[i].append([0,0,0,0])
+        # x_pos = []
+        # y_pos = []
+        for i,row in df.iterrows():
+            val1 = row[tif1_label]
+            val2 = row[tif2_label]
+            x = (val1 - min1) / (max1 - min1) * self.res
+            y = (val2 - min2) / (max2 - min2) * self.res
+            x = int(round(x, 0))
+            y = int(round(y, 0))
+            if x < 0:
+                x = 0
+            if x > self.res - 1:
+                x = self.res - 1
+            if y < 0:
+                y = 0
+            if y > self.res - 1:
+                y = self.res - 1
+
+            color = self.get_color(x, y)
+            r,g,b,a = color
+            r = int(r * 255)
+            g = int(g * 255)
+            b = int(b * 255)
+            a = int(a * 255)
+            color_arr = [r,g,b,a]
+            # print(color)
+            # exit()
+            pix = row['pix']
+            r,c = pix
+            result_arr[r][c] = color_arr
+        # outf = '/Volumes/NVME2T/China_drought_response/results/statistic/Bivariate_statistic/tif/xy_map_lag/SPEI03/bivariate.tif'
+        result_arr = np.array(result_arr, dtype=np.uint8)
+        GDAL_func().RGBA_to_tif(result_arr, outtif,tif1)
+        plt.figure(figsize=(5, 5))
+        plt.imshow(self.rgb_arr[::-1])
+        plt.xlabel(tif1_label)
+        plt.ylabel(tif2_label)
+
+        x_ticklabels = np.linspace(min1, max1, n_x)
+        y_ticklabels = np.linspace(min2, max2, n_y)[::-1]
+        x_ticklabels = np.round(x_ticklabels, 2)
+        y_ticklabels = np.round(y_ticklabels, 2)
+        xticks = np.linspace(0, self.res, n_x)
+        yticks = np.linspace(0, self.res, n_y)
+
+        plt.xticks(xticks, x_ticklabels)
+        plt.yticks(yticks, y_ticklabels)
+        # outpdf = outtif.replace('.tif', '.pdf')
+        # plt.savefig(outpdf)
+        # plt.close()
+
 
 
 def main():
