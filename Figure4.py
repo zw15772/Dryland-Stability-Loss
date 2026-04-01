@@ -6,7 +6,8 @@ class multiregression:
                            'composite_LAI_median']
     def run(self):
         # self.statistic_corr_boxplot()
-        self.statistic_contribution_no_residual()
+        # self.statistic_contribution_no_residual()
+        self.max_correlation_with_sign()
 
     def statistic_corr_boxplot(self):
 
@@ -246,6 +247,106 @@ class multiregression:
         df = df[df['landcover_classfication'] != 'Cropland']
 
         return df
+
+    def max_correlation_with_sign(self):
+
+        dff = result_root + rf'\\Upload_Data\Figure4\Obs_TRENDY_comparison\\Obs_TRENDY_comparison.df'
+        df = T.load_df(dff)
+        df = self.df_clean(df)
+        df = df[df['composite_LAI_median_detrend_CV_zscore_trend'] > 0]
+        df = df[df['composite_LAI_median_detrend_CV_zscore_p_value'] < 0.05]
+
+        model_list = ['composite_LAI_median', 'TRENDY_ensemble_median_2']
+
+        var_list = [
+            'sensitivity',
+            'Precip_sum_detrend_CV',
+            'CV_daily_rainfall_average',
+        ]
+
+        for model in tqdm(model_list):
+            # if not 'TRENDY_ensemble_mean2' in model:
+            #     continue
+
+            outdir = result_root + rf'\partial_correlation\TRENDY\result\\{model}\\'
+            T.mk_dir(outdir, force=True)
+
+            # === merge variable name with model name ===
+            var_list_sens = [f'{model}_' + v for v in var_list]
+
+            max_var_list = []
+            color_list = []
+            trend_val_list = []
+
+            for _, row in df.iterrows():
+                # ======
+                vals_sens = np.array([row[v] for v in var_list_sens], dtype=float)
+                vals_sens[(vals_sens < -10) | (vals_sens > 10)] = np.nan
+
+                if np.all(np.isnan(vals_sens)):
+                    max_var_list.append(np.nan)
+                    color_list.append(np.nan)
+                    trend_val_list.append(np.nan)
+                    continue
+
+                # === find max value abs ===
+                idx_max = np.nanargmax(np.abs(vals_sens))
+                max_var = var_list[idx_max]  # 注意取原始名字 (e.g. 'sensitivity')
+
+                # === 嵌套逻辑：dominant + trend方向 ===
+                if 'sensitivity' in max_var:
+                    color = 1
+                elif 'Precip_sum_detrend_CV' in max_var:
+
+                    color = 2
+
+                elif 'CV_daily_rainfall_average' in max_var:
+
+                    color = 3
+
+                else:
+                    color = np.nan
+
+                max_var_list.append(max_var)
+                color_list.append(color)
+
+            df['max_var'] = max_var_list
+            df['color'] = color_list
+
+            # ===  color_map ===
+            outdir = outdir
+            spatial_dic = T.df_to_spatial_dic(df, 'color')
+            # out_tif = join(outdir, 'dominant_color_map_without_sign.tif')
+            # DIC_and_TIF().pix_dic_to_tif(spatial_dic, out_tif)
+
+            arr = DIC_and_TIF().pix_dic_to_spatial_arr(spatial_dic)
+            from matplotlib.colors import ListedColormap, BoundaryNorm
+
+            # === 定义离散颜色 ===
+            cmap = ListedColormap([
+                '#1f78b4',  # 1: rainfall sensitivity (γ)
+                '#33a02c',  # 2: CV_inter rainfall
+                '#e31a1c'  # 3: CV_intra rainfall
+            ])
+
+            # === boundaries===
+            bounds = [0.5, 1.5, 2.5, 3.5]
+            norm = BoundaryNorm(bounds, cmap.N)
+
+
+            plt.imshow(arr, interpolation='nearest', cmap=cmap, norm=norm)
+
+            cbar = plt.colorbar(ticks=[1, 2, 3])
+            cbar.ax.set_yticklabels([
+                'Rainfall sensitivity (γ)',
+                'CV_inter rainfall',
+                'CV_intra rainfall'
+            ])
+
+            plt.title(f'{model} - Dominant factor for LAI variability')
+            plt.show()
+
+
 
 def main():
     multiregression().run()
