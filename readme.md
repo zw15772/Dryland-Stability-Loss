@@ -4,8 +4,8 @@ This repository contains the code used to analyze long-term changes in vegetatio
 
 ## The workflow includes:
 
-1. Quantifying vegetation variability trends  
-2. Decomposing vegetation extremes (LAI_max and LAI_min)  
+1. Plot global dryland trends in vegetation greenness and its variability(LAIcv)  
+2. Decomposing LAIcv into vegetation upper and lower tails (LAI_max and LAI_min as well as each percentile)  
 3. Attributing variability to climate variability and ecosystem sensitivity  
 4. Evaluating model performance against observations  
 
@@ -35,10 +35,10 @@ All required datasets are available at:
 
 ### Data contents include:
 
-- Long-term LAI datasets (e.g., GIMMS LAI, SNU LAI, MODIS LAI)  
-- Climate datasets (e.g., TerraClimate, CRU)  
+- Long-term LAI datasets (e.g., GIMMS4g LAI, SNU LAI,GLOBMAP LAI)  
+- Climate datasets (e.g., CRU)  
 - Derived variables (e.g., detrended LAI, CV metrics)  
-- DGVM outputs (e.g., TRENDY ensemble)  
+- DGVM outputs (e.g., TRENDYv13)  
 
 ---
 
@@ -69,9 +69,14 @@ Python version: 3.13.12
 
 Install required packages:
 
-```pip install lytools xymap statsmodels shap xgboost```
+```pip install lytools xymap statsmodels```
+Estimate installation time:
+```5 minutes```
 
 
 ## Workflow
 Run the notebooks in the following order:
 ```Fig1.ipynb → Fig2.ipynb → Fig3.ipynb → Fig4.ipynb```
+
+Estimated runtime for each notebook:
+```1-2 minutes```
