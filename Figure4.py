@@ -349,7 +349,9 @@ class multiregression:
 
 
 def main():
-    multiregression().run()
+    multiregression().statistic_corr_boxplot()
+    multiregression().statistic_contribution_no_residual()
+    multiregression().max_correlation_with_sign()
 
 
 
