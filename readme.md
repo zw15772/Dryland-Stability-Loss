@@ -70,7 +70,7 @@ Python version: 3.13.12
 
 Install required packages:
 
-```pip install lytools xymap statsmodels```
+```pip install lytools==0.0.138 xymap==0.0.10 statsmodels```
 Estimate installation time:
 ```5 minutes```
 
