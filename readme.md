@@ -30,8 +30,9 @@ Due to the large size of the datasets, input data are not included in this repos
 
 All required datasets are available at:
 
-👉 **Google Drive:** 
-[https://drive.google.com/drive/folders/11nR3-YS446Cbjhx0tTXy4u5oWUWGyf67](https://drive.google.com/drive/folders/11nR3-YS446Cbjhx0tTXy4u5oWUWGyf67)
+👉 **Zenodo:** 
+https://zenodo.org/records/21536424
+
 
 ### Data contents include:
 
