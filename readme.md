@@ -31,7 +31,7 @@ Due to the large size of the datasets, input data are not included in this repos
 All required datasets are available at:
 
 👉 **Zenodo:** 
-https://zenodo.org/records/21536424
+[https://zenodo.org/records/21536424](https://doi.org/10.5281/zenodo.21536423)
 
 
 ### Data contents include:
